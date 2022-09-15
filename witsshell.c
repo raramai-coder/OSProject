@@ -23,8 +23,6 @@ int main(int MainArgc, char *MainArgv[]){
 	
 	while (characters != EOF)
 	{
-		
-		
     	printf("witsshell>");
     	characters = getline(&b,&bufsize,stdin);
 
@@ -32,9 +30,16 @@ int main(int MainArgc, char *MainArgv[]){
 
 		if(comp==0){
 			
-			run = false; 
-			//exit(0);
+			//run = false; 
+			exit(0);
 		}
+		printf("%u",comp);
+		char *found;
+
+		// while( (found = strsep(&b," ")) != NULL ){
+		// 	printf("%s\n",found);
+		// }
+        
 
 	}
 	
