@@ -87,10 +87,10 @@ int main(int MainArgc, char *MainArgv[]){
 			arraySize++;
 		}
 
-		for (int i = 0; i < arraySize; i++)
-		{
-			printf("%s\n",command[i]);
-		}
+		// for (int i = 0; i < arraySize; i++)
+		// {
+		// 	printf("%s\n",command[i]);
+		// }
 		
 		
 
