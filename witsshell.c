@@ -12,7 +12,7 @@ int main(int MainArgc, char *MainArgv[]){
 	
 	bool run =true;
 	char input[] = {};
-	char exit[] = "exit\n";
+	char exitCommand[] = "exit\n";
 
 	//variables for getline function
 	char buffer[32];
@@ -21,21 +21,24 @@ int main(int MainArgc, char *MainArgv[]){
     size_t characters;
 
 	
-	while (run)
+	while (characters != EOF)
 	{
 		
 		
     	printf("witsshell>");
     	characters = getline(&b,&bufsize,stdin);
 
-		int comp = strcmp(buffer,exit);
+		int comp = strcmp(buffer,exitCommand);
 
 		if(comp==0){
+			
 			run = false; 
+			//exit(0);
 		}
 
 	}
 	
 
-	return(0);
+	//return(0);
+	exit(0);
 }
