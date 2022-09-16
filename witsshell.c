@@ -51,8 +51,9 @@ void insertFirst(int key, int data) {
 
 char *command[1024];
 int arraySize = 0;
-char *pathArray[1024];
+char *pathArray[1024]={"/bin/"};
 
+//function to store the path specified by the user
 int processPath(){
 	char pathCommand[]="path";
 
@@ -61,18 +62,35 @@ int processPath(){
 	if(comp==0){
 			
 		//printf("user is setting path");
+
+		memset(pathArray, 0, sizeof pathArray);
+		pathArray[0] ="/bin/";
+		//pathArray ={"/bin/"};
+		//printf("%s\n",pathArray[0]);
+
 		for (int i = 1; i < arraySize; i++)
 		{
-			pathArray[i-1] = command[i];
+			pathArray[i] = command[i];
 		}
+
+		//printf("%u", arraySize);
+
+		// for (int i = 0; i < arraySize; i++)
+		// {
+		// 	printf("%s\n",pathArray[i]);
+		// }
 		
 	}
 
-	for (int i = 0; i < arraySize-1; i++)
-	{
-		printf("%s\n",pathArray[i]);
-	}
-	//printf("%s\n", command[0]);
+	// for (int i = 0; i < arraySize; i++)
+	// {
+	// 	printf("%s\n",pathArray[i]);
+	// }
+
+	// for (int i = 0; i < arraySize; i++)
+	// {
+	// 	printf("%s\n",command[i]);
+	// }
 }
 
 // function to check whether user has typed exit, built-in function exit
@@ -91,7 +109,8 @@ int checkExit(char *b){
 //function to separate input string into parts and store in array
 int separateCommand(char *b){
 	char *found;
-	//int arraySize = 0;
+	arraySize = 0;
+	memset(command, 0, sizeof command);
 
 	while( (found = strsep(&b," ")) != NULL ){
 		//printf("%s\n",found);
