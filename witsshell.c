@@ -50,10 +50,29 @@ void insertFirst(int key, int data) {
 #pragma endregion 
 
 char *command[1024];
+int arraySize = 0;
+char *pathArray[1024];
 
-int path(){
+int processPath(){
+	char pathCommand[]="path";
 
+	int comp = strcmp(command[0],pathCommand);
 
+	if(comp==0){
+			
+		//printf("user is setting path");
+		for (int i = 1; i < arraySize; i++)
+		{
+			pathArray[i-1] = command[i];
+		}
+		
+	}
+
+	for (int i = 0; i < arraySize-1; i++)
+	{
+		printf("%s\n",pathArray[i]);
+	}
+	//printf("%s\n", command[0]);
 }
 
 // function to check whether user has typed exit, built-in function exit
@@ -69,9 +88,10 @@ int checkExit(char *b){
 	}
 }
 
+//function to separate input string into parts and store in array
 int separateCommand(char *b){
 	char *found;
-	int arraySize = 0;
+	//int arraySize = 0;
 
 	while( (found = strsep(&b," ")) != NULL ){
 		//printf("%s\n",found);
@@ -80,25 +100,20 @@ int separateCommand(char *b){
 		arraySize++;
 	}
 
-	for (int i = 0; i < arraySize; i++)
-	{
-		printf("%s\n",command[i]);
-	}
+	// for (int i = 0; i < arraySize; i++)
+	// {
+	// 	printf("%s\n",command[i]);
+	// }
 }
 
 int main(int MainArgc, char *MainArgv[]){
 	
-	bool run =true;
-	char input[] = {};
-	//char exitCommand[] = "exit\n";
-
-	//char *command[1024];
-
-	//variables for getline function
+	#pragma region variables for getline function
 	char buffer[32];
     char *b = buffer;
     size_t bufsize = 32;
     size_t characters;
+	#pragma endregion
 
 	
 	while (characters != EOF)
@@ -110,12 +125,10 @@ int main(int MainArgc, char *MainArgv[]){
 
 		separateCommand(b); //separate the input string into an array
 
-		
-		
+		processPath();
 
 	}
 	
 
-	//return(0);
 	exit(0);
 }
