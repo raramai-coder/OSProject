@@ -53,6 +53,8 @@ char *command[1024];
 int arraySize = 0;
 char *pathArray[1024]={"/bin/"};
 
+
+
 //function to store the path specified by the user
 int processPath(){
 	char pathCommand[]="path";
@@ -82,15 +84,6 @@ int processPath(){
 		
 	}
 
-	// for (int i = 0; i < arraySize; i++)
-	// {
-	// 	printf("%s\n",pathArray[i]);
-	// }
-
-	// for (int i = 0; i < arraySize; i++)
-	// {
-	// 	printf("%s\n",command[i]);
-	// }
 }
 
 // function to check whether user has typed exit, built-in function exit
@@ -125,6 +118,36 @@ int separateCommand(char *b){
 	// }
 }
 
+int cdCommand(){
+	char cdCommand[]="cd";
+
+	int comp = strcmp(command[0],cdCommand);
+
+	if(comp==0){
+		//printf("user is changing directory");
+		if(arraySize==2){
+			chdir(command[1]);
+			printf("user changed directory");
+		}else{
+			printf("Error: can't find directory with multiple parts");
+		}
+	}
+
+	char cdCommandError[]="cd\n";
+
+	int compError = strcmp(command[0],cdCommandError);
+	if(compError==0){
+		printf("Error: user is changing directory without path");
+	}
+}
+
+//function to check and implement built in commands
+int builtInCommand(char *b){
+	checkExit(b);  //check and run exit built in function
+	processPath(); // check and run path built in function
+	cdCommand(); //check and run cd built in function
+}
+
 int main(int MainArgc, char *MainArgv[]){
 	
 	#pragma region variables for getline function
@@ -139,12 +162,14 @@ int main(int MainArgc, char *MainArgv[]){
 	{
     	printf("witsshell>");
     	characters = getline(&b,&bufsize,stdin);
-
-		checkExit(b); //check if user typed exit and execute
-
 		separateCommand(b); //separate the input string into an array
+		builtInCommand(b);
+		
+		//checkExit(b); //check if user typed exit and execute
 
-		processPath();
+		//separateCommand(b); //separate the input string into an array
+
+		//processPath();
 
 	}
 	
