@@ -49,15 +49,50 @@ void insertFirst(int key, int data) {
 }
 #pragma endregion 
 
+char *command[1024];
 
+int path(){
+
+
+}
+
+// function to check whether user has typed exit, built-in function exit
+int checkExit(char *b){
+
+	char exitCommand[] = "exit\n";
+
+	int comp = strcmp(b,exitCommand);
+
+	if(comp==0){
+			
+		exit(0);
+	}
+}
+
+int separateCommand(char *b){
+	char *found;
+	int arraySize = 0;
+
+	while( (found = strsep(&b," ")) != NULL ){
+		//printf("%s\n",found);
+			
+		command[arraySize] = found;
+		arraySize++;
+	}
+
+	for (int i = 0; i < arraySize; i++)
+	{
+		printf("%s\n",command[i]);
+	}
+}
 
 int main(int MainArgc, char *MainArgv[]){
 	
 	bool run =true;
 	char input[] = {};
-	char exitCommand[] = "exit\n";
+	//char exitCommand[] = "exit\n";
 
-	char *command[1024];
+	//char *command[1024];
 
 	//variables for getline function
 	char buffer[32];
@@ -71,26 +106,10 @@ int main(int MainArgc, char *MainArgv[]){
     	printf("witsshell>");
     	characters = getline(&b,&bufsize,stdin);
 
-		int comp = strcmp(b,exitCommand);
+		checkExit(b); //check if user typed exit and execute
 
-		if(comp==0){
-			
-			exit(0);
-		}
-		//printf("%u",comp);
-		char *found;
-		int arraySize = 0;
-		while( (found = strsep(&b," ")) != NULL ){
-			//printf("%s\n",found);
-			
-			command[arraySize] = found;
-			arraySize++;
-		}
+		separateCommand(b); //separate the input string into an array
 
-		// for (int i = 0; i < arraySize; i++)
-		// {
-		// 	printf("%s\n",command[i]);
-		// }
 		
 		
 
