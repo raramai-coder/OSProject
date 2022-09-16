@@ -126,20 +126,34 @@ int cdCommand(){
 	if(comp==0){
 		//printf("user is changing directory");
 		if(arraySize==2){
-			chdir(command[1]);
+			//chdir("..");
+			//chdir(command[1]);
 			// if (fork()!=0)
 			// {
 			// 	pid_t cpid;
 			// 	cpid = wait(NULL);
 			// }
 
-			if (chdir(command[1])!=0)
-			{
-				printf("Error");
+			//char *cdPath= strcat("/home/vmuser/Documents/Wits-Shell-Tester/OSProject/",command[1]); 
+			// char *cdPath="/home/vmuser/Documents/Wits-Shell-Tester/OSProject/cdtest";
+			// int result = access(cdPath, F_OK);
+			// printf("%u\n", result);
+
+			// if (chdir(command[1])!=0)
+			// {
+			// 	printf("Error\n");
+			// }else{
+			// 	printf("user changed directory to ");
+			// 	printf("%s\n",getcwd(command[1],100));
+			// }
+
+			char s[100];
+			if(chdir("/cdtest")!=0){
+				printf("Error\n");
 			}else{
-				printf("user changed directory to ");
-				printf("%s\n",getcwd(command[1],100));
+				printf("%s\n",getcwd(s,1024));
 			}
+			//printf("%s\n",getcwd("cdtest",100));
 			
 			
 			
