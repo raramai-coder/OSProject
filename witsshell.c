@@ -127,7 +127,22 @@ int cdCommand(){
 		//printf("user is changing directory");
 		if(arraySize==2){
 			chdir(command[1]);
-			printf("user changed directory");
+			// if (fork()!=0)
+			// {
+			// 	pid_t cpid;
+			// 	cpid = wait(NULL);
+			// }
+
+			if (chdir(command[1])!=0)
+			{
+				printf("Error");
+			}else{
+				printf("user changed directory to ");
+				printf("%s\n",getcwd(command[1],100));
+			}
+			
+			
+			
 		}else{
 			printf("Error: can't find directory with multiple parts");
 		}
