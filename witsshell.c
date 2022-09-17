@@ -8,51 +8,9 @@
 #include <fcntl.h>
 
 
-#pragma region linked-list-structure
-
-struct node {
-   int data;
-   int key;
-   struct node *next;
-};
-
-struct node *head = NULL;
-struct node *current = NULL;
-
-//display the list
-void printList() {
-   struct node *ptr = head;
-   printf("\n[ ");
-	
-   //start from the beginning
-   while(ptr != NULL) {
-      printf("(%d,%d) ",ptr->key,ptr->data);
-      ptr = ptr->next;
-   }
-	
-   printf(" ]");
-}
-
-//insert link at the first location
-void insertFirst(int key, int data) {
-   //create a link
-   struct node *link = (struct node*) malloc(sizeof(struct node));
-	
-   link->key = key;
-   link->data = data;
-	
-   //point it to old first node
-   link->next = head;
-	
-   //point first to new first node
-   head = link;
-}
-#pragma endregion 
-
 char *command[1024];
 int arraySize = 0;
 char *pathArray[1024]={"/bin/"};
-
 
 
 //function to store the path specified by the user
@@ -174,6 +132,44 @@ int builtInCommand(char *b){
 	cdCommand(); //check and run cd built in function
 }
 
+int executeCommand(){
+	//printf("excuting command\n");
+
+	// char *binaryPath = "/bin/ls";
+  	// char *args[] = {binaryPath, "-lh", "/home", NULL};
+ 
+  	// execv(binaryPath, args);
+ 
+  	//return 0;
+
+	// pid_t pid;
+    // char *const parmList[] = {"/bin/ls", "-l", "/u/userid/dirname", NULL};
+
+    // if ((pid = fork()) == -1)
+    //     perror("fork error");
+    // else if (pid == 0) {
+    //     execv("/bin/ls", parmList);
+    //     printf("Return not expected. Must be an execv error.n");
+    // }
+
+	int status;
+	char *args[2];
+	char *executable = malloc(100);
+	strcat(executable,pathArray[0]);
+	strtok(command[0],"\n");
+	strcat(executable,command[0]);
+	
+	if(fork()==0){
+		execv(executable, pathArray);
+	}else{
+		wait(&status);
+		//exit(0);
+		return(0);
+	}
+
+
+}
+
 int main(int MainArgc, char *MainArgv[]){
 	
 	#pragma region variables for getline function
@@ -189,14 +185,8 @@ int main(int MainArgc, char *MainArgv[]){
     	printf("witsshell>");
     	characters = getline(&b,&bufsize,stdin);
 		separateCommand(b); //separate the input string into an array
-		builtInCommand(b);
-		
-		//checkExit(b); //check if user typed exit and execute
-
-		//separateCommand(b); //separate the input string into an array
-
-		//processPath();
-
+		builtInCommand(b);  //checks for built-in commands and runs those
+		executeCommand();
 	}
 	
 
