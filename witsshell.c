@@ -118,6 +118,7 @@ int separateCommand(char *b){
 	// }
 }
 
+//function to change directory
 int cdCommand(){
 	char cdCommand[]="cd";
 
@@ -126,36 +127,32 @@ int cdCommand(){
 	if(comp==0){
 		//printf("user is changing directory");
 		if(arraySize==2){
-			//chdir("..");
-			//chdir(command[1]);
-			// if (fork()!=0)
-			// {
-			// 	pid_t cpid;
-			// 	cpid = wait(NULL);
-			// }
+			
+			int child = fork();
+			if(child==0){
 
-			//char *cdPath= strcat("/home/vmuser/Documents/Wits-Shell-Tester/OSProject/",command[1]); 
-			// char *cdPath="/home/vmuser/Documents/Wits-Shell-Tester/OSProject/cdtest";
-			// int result = access(cdPath, F_OK);
-			// printf("%u\n", result);
-
-			// if (chdir(command[1])!=0)
-			// {
-			// 	printf("Error\n");
-			// }else{
-			// 	printf("user changed directory to ");
-			// 	printf("%s\n",getcwd(command[1],100));
-			// }
-
-			char s[100];
-			if(chdir("/cdtest")!=0){
-				printf("Error\n");
+        		strtok(command[1],"\n");
+				int ret = chdir(command[1]);
+				//int ret = chdir("cdtest");
+        		if (ret == 0) { // success
+					char cwd[256];
+					if (getcwd(cwd, sizeof(cwd)) == NULL){
+						perror("getcwd() error: ");
+					}	
+    				else{
+						printf("Changed directory to: %s\n", cwd);
+					}
+      					
+        		} else {
+            		perror("UNABLE to change directory");
+        		}
+				//exit(0);
+				
 			}else{
-				printf("%s\n",getcwd(s,1024));
+				int s;
+				wait(&s);
+				exit(0);
 			}
-			//printf("%s\n",getcwd("cdtest",100));
-			
-			
 			
 		}else{
 			printf("Error: can't find directory with multiple parts");
