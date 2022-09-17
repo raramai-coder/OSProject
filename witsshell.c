@@ -142,7 +142,6 @@ int builtInCommand(char *b){
 //function to execute bin commands
 int executeCommand(){
 	
-
 	int status;
 	char *args[2];
 	char *executable = malloc(100);
@@ -180,6 +179,7 @@ int executeCommand(){
 	
 }
 
+//function to handle user redirecting output in terminal
 int redirection(){
 
 	char redirectCommand[]=">";
@@ -197,24 +197,50 @@ int redirection(){
 	if(redirect){
 
 		int status;
-		//printf("must redict : redirection");
 
 		if(fork()==0){
 			fileName = command[redirectPos];
 			strtok(fileName,"\n");
 			strcat(fileName,".txt");
-			// //printf("%s\n", fileName);
-			// fp = freopen(fileName, "a+", stdout);
-
-			//int file_desc = open("dup.txt", O_WRONLY | O_APPEND);
 			
 		}else{
 			wait(&status);
-			//fclose(fp);
 			exit(0);
 		}
-		//fclose(fp);
-		//printf("%u\n",fclose(fp));
+	}
+}
+
+int parallelCommands(){
+	char parallelCommand[]="&";
+	bool parallel = false;
+	int parallelCommands = 1;
+
+	for (int i = 0; i<arraySize;++i)
+	{
+		int comp = strcmp(command[i],parallelCommand);
+		if(comp ==0){
+			parallel = true;
+			++parallelCommands;
+		}
+	}
+
+	if(parallel){
+		//printf("paralley command");
+		printf("%u\n", parallelCommands);
+
+		//int pid = fork();
+
+		if(fork() == 0){
+			printf("child process number \n");
+		}else{
+			for (int i = 0; i < parallelCommands-1; i++)
+			{
+				if(fork()==0){
+					printf("child process number \n");
+				}
+			}
+			
+		}
 	}
 }
 
@@ -227,47 +253,16 @@ int main(int MainArgc, char *MainArgv[]){
     size_t characters;
 	#pragma endregion
 
-	
-	// freopen ("myfile1.txt","a+",stdout);
-  	// printf ("This sentence is redirected to a file.\n");
-  	// fclose (stdout);
 
 	while (characters != EOF)
 	{
     	printf("witsshell>");
     	characters = getline(&b,&bufsize,stdin);
 		separateCommand(b); //separate the input string into an array
+		parallelCommands();
 		builtInCommand(b);  //checks for built-in commands and runs those
-		redirection();
+		redirection();		
 		executeCommand();
-		//fclose (stdout);
-		// int t;
-
-		//freopen ("myfile1.txt","a+",stdout);
-  		//printf ("This sentence is redirected to a file.\n");
-		//fflush(stdout);
-		//printf ("flushed \n");
-		//exit(0);
-  		//fclose (stdout);
-		//printf("%u\n",fclose(fp));
-		// if(fclose(fp)==0){
-		// 	printf(fclose(fp));
-		// }else{
-		// 	perror(" failed to close file");
-		// 	exit(-1);
-		// }
-		//int t = fclose(fp);
-		//printf("%d\n", t);
-		
-		//freopen ("myfile1.txt","w",stdout);
-  		//printf ("This sentence is redirected to a file.");
-  		//fclose (stdout);
-		// if(redirect){
-		// 	//close
-		// 	printf("trying to close fp");
-		// 	fclose(fp);
-		// 	printf("closed fp");
-		// }
 		
 	}
 	
