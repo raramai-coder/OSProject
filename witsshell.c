@@ -6,11 +6,18 @@
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include<sys/types.h>
+
+
 
 
 char *command[1024];
+char *fileName;
 int arraySize = 0;
 char *pathArray[1024]={"/bin/"};
+bool redirect = false;
+FILE *fp;
 
 
 //function to store the path specified by the user
@@ -132,42 +139,83 @@ int builtInCommand(char *b){
 	cdCommand(); //check and run cd built in function
 }
 
+//function to execute bin commands
 int executeCommand(){
-	//printf("excuting command\n");
-
-	// char *binaryPath = "/bin/ls";
-  	// char *args[] = {binaryPath, "-lh", "/home", NULL};
- 
-  	// execv(binaryPath, args);
- 
-  	//return 0;
-
-	// pid_t pid;
-    // char *const parmList[] = {"/bin/ls", "-l", "/u/userid/dirname", NULL};
-
-    // if ((pid = fork()) == -1)
-    //     perror("fork error");
-    // else if (pid == 0) {
-    //     execv("/bin/ls", parmList);
-    //     printf("Return not expected. Must be an execv error.n");
-    // }
+	
 
 	int status;
 	char *args[2];
 	char *executable = malloc(100);
+	
 	strcat(executable,pathArray[0]);
 	strtok(command[0],"\n");
 	strcat(executable,command[0]);
-	
-	if(fork()==0){
-		execv(executable, pathArray);
+	int pfd;
+
+	if(redirect){
+		//printf("must redirecty");
+		mode_t mode = S_IRWXU;
+		pfd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC ,mode);
+		if(fork()==0){
+			dup2(pfd,1);
+			dup2(pfd,2);
+			//close(pfd);
+			execv(executable, pathArray);
+		}else{
+			wait(&status);
+			close(pfd);
+			return(0);
+		}
+		//close(pfd);
 	}else{
-		wait(&status);
-		//exit(0);
-		return(0);
+		
+		if(fork()==0){
+			execv(executable, pathArray);
+		}else{
+			wait(&status);
+			return(0);
+		}
+	}
+	
+	
+}
+
+int redirection(){
+
+	char redirectCommand[]=">";
+	int redirectPos = 0;
+
+	for (int i = 0; i<arraySize;++i)
+	{
+		int comp = strcmp(command[i],redirectCommand);
+		if(comp ==0){
+			redirect = true;
+			redirectPos = i+1;
+		}
 	}
 
+	if(redirect){
 
+		int status;
+		//printf("must redict : redirection");
+
+		if(fork()==0){
+			fileName = command[redirectPos];
+			strtok(fileName,"\n");
+			strcat(fileName,".txt");
+			// //printf("%s\n", fileName);
+			// fp = freopen(fileName, "a+", stdout);
+
+			//int file_desc = open("dup.txt", O_WRONLY | O_APPEND);
+			
+		}else{
+			wait(&status);
+			//fclose(fp);
+			exit(0);
+		}
+		//fclose(fp);
+		//printf("%u\n",fclose(fp));
+	}
 }
 
 int main(int MainArgc, char *MainArgv[]){
@@ -180,13 +228,47 @@ int main(int MainArgc, char *MainArgv[]){
 	#pragma endregion
 
 	
+	// freopen ("myfile1.txt","a+",stdout);
+  	// printf ("This sentence is redirected to a file.\n");
+  	// fclose (stdout);
+
 	while (characters != EOF)
 	{
     	printf("witsshell>");
     	characters = getline(&b,&bufsize,stdin);
 		separateCommand(b); //separate the input string into an array
 		builtInCommand(b);  //checks for built-in commands and runs those
+		redirection();
 		executeCommand();
+		//fclose (stdout);
+		// int t;
+
+		//freopen ("myfile1.txt","a+",stdout);
+  		//printf ("This sentence is redirected to a file.\n");
+		//fflush(stdout);
+		//printf ("flushed \n");
+		//exit(0);
+  		//fclose (stdout);
+		//printf("%u\n",fclose(fp));
+		// if(fclose(fp)==0){
+		// 	printf(fclose(fp));
+		// }else{
+		// 	perror(" failed to close file");
+		// 	exit(-1);
+		// }
+		//int t = fclose(fp);
+		//printf("%d\n", t);
+		
+		//freopen ("myfile1.txt","w",stdout);
+  		//printf ("This sentence is redirected to a file.");
+  		//fclose (stdout);
+		// if(redirect){
+		// 	//close
+		// 	printf("trying to close fp");
+		// 	fclose(fp);
+		// 	printf("closed fp");
+		// }
+		
 	}
 	
 
