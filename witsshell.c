@@ -18,6 +18,14 @@ int arraySize = 0;
 char *pathArray[1024]={"/bin/"};
 bool redirect = false;
 FILE *fp;
+int pCommands = 1;
+bool parallel = false;
+bool mustExit = false;
+
+#pragma region parallel commands variables
+char *pCommand[1024];
+int pArraySize = 0;
+#pragma endregion
 
 
 //function to store the path specified by the user
@@ -210,35 +218,195 @@ int redirection(){
 	}
 }
 
-int parallelCommands(){
+bool checkParallel(){
 	char parallelCommand[]="&";
-	bool parallel = false;
-	int parallelCommands = 1;
+	pCommands = 1;
+	//bool parallel = false;
+	//int parallelCommands = 1;
 
 	for (int i = 0; i<arraySize;++i)
 	{
 		int comp = strcmp(command[i],parallelCommand);
 		if(comp ==0){
-			parallel = true;
-			++parallelCommands;
+			if(!parallel){
+				parallel = true;
+			}
+			
+			++pCommands;
 		}
 	}
 
+	return parallel;
+}
+
+int separateParallelCommand(char b[]){
+	char *found;
+	pArraySize = 0;
+	//memset(pCommand, 0, sizeof pCommand);
+	//printf("separating parallel command \n");
+
+	while( (found = strsep(&b," ")) != NULL ){
+		//printf("%s\n",found);
+			
+		pCommand[pArraySize] = found;
+		pArraySize++;
+	}
+
+	//pArraySize--;
+
+	//printf("%u\n", pArraySize);
+
+	// for (int i = 0; i < pArraySize; i++)
+	// {
+	// 	if(i ==pArraySize-1){
+	// 		printf("%s\n",pCommand[i]);
+	// 	}else{
+	// 		printf("%s\t",pCommand[i]);
+	// 	}
+		
+	// }
+}
+
+int pExit(char b[]){
+	
+	//exit(0);
+	//mustExit = true;
+	char exitCommand[] = " exit\n";
+
+	int comp = strcmp(" exit\n",exitCommand);
+	printf("%s\n",b);
+
+	if(comp==0){
+		//printf("%s\n",b);
+		//checkExit("exit\n");
+		//char *out = "exit\n";
+		//checkExit(out);	
+		exit(0);
+	}else{
+		printf("%i\n", comp);
+	}
+
+	char exitCommandMidline[] = " exit";
+
+	int compMidline = strcmp(b,exitCommandMidline);
+	//printf("%s\n",b);
+
+	if(compMidline==0){
+			
+		exit(0);
+	}else{
+		printf("%i\n", compMidline);
+	}
+}
+
+int pBuiltInCommand(char b[]){
+	pExit(b);
+	//exit(0);
+	//checkExit(b);  //check and run exit built in function
+	//processPath(); // check and run path built in function
+	//cdCommand(); //check and run cd built in function
+}
+
+int runParallelCommands(char b[]){
+	separateParallelCommand(b);
+	pBuiltInCommand(b);
+	// builtInCommand(b);  //checks for built-in commands and runs those
+	// redirection();		
+	// executeCommand();
+}
+
+int parallelCommands(){
+
+	char commandsArray[1024][1024];
+	int commandNumber = 0;
+	char *newCommand = malloc(100);
+
+	memset(commandsArray, 0, sizeof commandsArray);
+
+	for (int i = 0; i < arraySize ; i++)
+	{
+		//printf("%s\n", command[i]);
+		char block[]="&";
+		int comp = strcmp(command[i],block);
+		
+		if(comp==0){ //if this is the & element
+			//commandsArray[commandNumber][commandNumber] = newCommand;
+			strcpy(commandsArray[commandNumber], newCommand);
+			//printf("%s\n", newCommand);
+			memset(newCommand, 0, sizeof newCommand);
+			++commandNumber;
+			//printf("command number %u\n", commandNumber);
+			continue;
+		}else{
+			//strcat(newCommand," ");
+			strcat(newCommand,command[i]);
+			strcat(newCommand," ");
+		}
+
+		if(i==arraySize-1){
+			//printf("last command %s\n", newCommand);
+			//printf("command number %u\n", commandNumber);
+			++commandNumber;
+			//printf("command number %u\n", commandNumber);
+			strcpy(commandsArray[commandNumber], newCommand);
+			//printf("%s\n",commandsArray[commandNumber+1]);
+
+		}
+		
+	}
+
+	// for (int i = 0; i < commandNumber+1; i++)
+	// {
+	// 	printf("%s\n",commandsArray[i]);
+	// }
+
+	
+	
 	if(parallel){
 		//printf("paralley command");
-		printf("%u\n", parallelCommands);
+		//printf("%u\n", parallelCommands);
+		int status;
+		
 
-		//int pid = fork();
-
-		if(fork() == 0){
-			printf("child process number \n");
+		pid_t pid = fork();
+		
+		if(pid == 0){
+			printf("child process number : 1 \n");
+			runParallelCommands(commandsArray[0]);
+			//pBuiltInCommand(commandsArray[0]);
+			//printf("%s\n",commandsArray[0]);
+			//separateParallelCommand(commandsArray[0]);
+			// builtInCommand(b);  //checks for built-in commands and runs those
+			// redirection();		
+			// executeCommand();
+			exit(0);
+			//return(0);
 		}else{
-			for (int i = 0; i < parallelCommands-1; i++)
+			for (int i = 0; i < commandNumber; i++)
 			{
-				if(fork()==0){
-					printf("child process number \n");
+				pid = fork();
+				if(pid==0){
+					printf("child process number : %u\n", i+2);
+					runParallelCommands(commandsArray[i+1]);
+					//pBuiltInCommand(commandsArray[i+1]);
+					//printf("%s\n",commandsArray[i+1]);
+					//separateParallelCommand(commandsArray[i+1]);
+					// builtInCommand(b);  //checks for built-in commands and runs those
+					// redirection();		
+					// executeCommand();
+					exit(0);
 				}
+				
 			}
+			wait(&status);
+			//exit(0);
+			return(0);
+
+			// printf("Waiting all child.\n");
+			// while ((pid=waitpid(-1,&status,0))!=-1) {
+  			// printf("Process %d terminated\n",pid);
+			// }
+			//return(0);
 			
 		}
 	}
@@ -247,22 +415,37 @@ int parallelCommands(){
 int main(int MainArgc, char *MainArgv[]){
 	
 	#pragma region variables for getline function
-	char buffer[32];
+	char buffer[1024];
     char *b = buffer;
-    size_t bufsize = 32;
+    size_t bufsize = 1024;
     size_t characters;
 	#pragma endregion
 
 
 	while (characters != EOF)
 	{
-    	printf("witsshell>");
+    	#pragma region reset variables
+		redirect = false;
+		parallel = false;
+		#pragma endregion
+
+		printf("witsshell>");
     	characters = getline(&b,&bufsize,stdin);
 		separateCommand(b); //separate the input string into an array
-		parallelCommands();
-		builtInCommand(b);  //checks for built-in commands and runs those
-		redirection();		
-		executeCommand();
+		if(checkParallel()){
+			parallelCommands(b);
+		}else{
+			builtInCommand(b);  //checks for built-in commands and runs those
+			redirection();		
+			executeCommand();
+		}
+
+		// if(mustExit){
+		// 	printf("must exit");
+		// 	exit(0);
+		// }
+		//parallelCommands();
+		
 		
 	}
 	
