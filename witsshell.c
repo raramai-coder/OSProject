@@ -20,7 +20,8 @@ FILE *fp;
 int pCommands = 1;
 bool parallel = false;
 bool mustExit = false;
-char *executable[1024];
+bool mustContinue = false;
+char executable[1024];
 char *args[1024];
 #pragma endregion
 
@@ -40,9 +41,10 @@ int processPath()
 	if (comp == 0)
 	{
 
-		// printf("user is setting path");
+		//printf("user is setting path");
 
 		memset(pathArray, 0, sizeof pathArray);
+		pathArraySize = 1;
 		pathArray[0] = "/bin/";
 		// pathArray ={"/bin/"};
 		// printf("%s\n",pathArray[0]);
@@ -53,6 +55,9 @@ int processPath()
 			++pathArraySize;
 		}
 
+		mustContinue = true;
+		//return(0);
+
 		//printf("%u", pathArraySize);
 
 		// for (int i = 0; i < arraySize; i++)
@@ -60,6 +65,7 @@ int processPath()
 		// 	printf("%s\n",pathArray[i]);
 		// }
 	}
+
 }
 
 // function to check whether user has typed exit, built-in function exit
@@ -115,7 +121,7 @@ int cdCommand()
 
 	if (comp == 0)
 	{
-		// printf("user is changing directory");
+		//printf("user is changing directory");
 		if (arraySize == 2)
 		{
 
@@ -159,6 +165,7 @@ int cdCommand()
 			char error_message[30] = "An error has occurred\n";
 			write(STDERR_FILENO, error_message, strlen(error_message));
 		}
+		mustContinue = true;
 	}
 
 	char cdCommandError[] = "cd\n";
@@ -169,7 +176,10 @@ int cdCommand()
 		// printf("Error: user is changing directory without path");
 		char error_message[30] = "An error has occurred\n";
 		write(STDERR_FILENO, error_message, strlen(error_message));
+		mustContinue = true;
 	}
+
+	
 }
 
 // function to check and implement built in commands
@@ -186,17 +196,22 @@ bool verifyCommand(){
 
 	for (int i = 0; i < pathArraySize; i++)
 	{
+		printf("%s\n",pathArray[i]);
+	}
+
+	for (int i = 0; i < pathArraySize; i++)
+	{
 		char *possibleExcutingFile = malloc(1024);
 		strcat(possibleExcutingFile,pathArray[i]);
 		strcat(possibleExcutingFile,command[0]);
-		//printf("%s\n", possibleExcutingFile);
+		printf("%s\n", possibleExcutingFile);
 
 		memset(executable,0,sizeof executable);
 
 		result = access (possibleExcutingFile, F_OK);
 		if (result == 0)
 		{
-			printf("can execute the command\n");
+			//printf("can execute the command\n");
 			canExecute = true;
 			strcat(executable, pathArray[i]);
 			//strtok(command[0], "\n");
@@ -215,20 +230,9 @@ bool verifyCommand(){
 	// if (!canExecute)
 	// {
 	// 	printf("can't execute the command\n");
+	// 	mustContinue = true;
 	// }
-	
-	
-	// const char *executingFile = "/bin/looos";
 
-
-	// result = access (executingFile, F_OK);
-	// if (result == 0)
-	// {
-	// 	printf("can execute the command\n");
-	// }else
-	// {
-	// 	printf("can't execute the command\n");
-	// }
 
 	return canExecute;
 }
@@ -254,7 +258,7 @@ int executeCommand()
 				dup2(pfd, 1);
 				dup2(pfd, 2);
 				// close(pfd);
-
+				//printf("%s\n", executable);
 				execv(executable, command);
 				//execv("/bin/sh/p1.sh", command);
 			}
@@ -268,13 +272,24 @@ int executeCommand()
 		}
 		else
 		{
-
+			// for (int i = 0; i < pathArraySize; i++)
+			// {
+			// 	printf("%s\n",pathArray[i]);
+			// }
+			
 			if (fork() == 0)
 			{
 
-				//execv(executable, command);
-				execv("tests/p2.sh", args);
-			}	
+				
+				// for (int i = 0; i < pathArraySize; i++)
+				// {
+				// 	printf("%s\n",pathArray[i]);
+				// }
+
+				execv(executable, command);// for (int i = 0; i < pathArraySize; i++)
+			// {
+			// 	printf("%s\n",pathArray[i]);
+			}
 			else
 			{
 				wait(&status);
@@ -284,6 +299,20 @@ int executeCommand()
 		}
 		
 	}
+
+	// if (fork() == 0)
+	// 		{
+
+	// 			//execv(executable, command);
+	// 			printf("here");
+	// 			execv("tests/p2.sh", args);
+	// 		}	
+	// 		else
+	// 		{
+	// 			wait(&status);
+	// 			printf("%d\n",WEXITSTATUS(status));
+	// 			return (0);
+	// 		}
 
 }
 
@@ -819,6 +848,7 @@ int main(int MainArgc, char *MainArgv[])
 		#pragma region reset variables
 		redirect = false;
 		parallel = false;
+		mustContinue = false;
 		#pragma endregion
 
 		printf("witsshell>");
@@ -826,13 +856,24 @@ int main(int MainArgc, char *MainArgv[])
 		separateCommand(b); // separate the input string into an array
 		if (checkParallel())
 		{
+			//printf("we're running paralle commands");
 			parallelCommands(b);
 			// printf("we're here");
 			//printf("%i\n", mustExit);
 		}
 		else
 		{
+			// for (int i = 0; i < pathArraySize; i++)
+			// {
+			// 	printf("%s\n",pathArray[i]);
+			// }
 			builtInCommand(b); // checks for built-in commands and runs those
+
+			if (mustContinue)
+			{
+				continue;
+			}
+
 			redirection();
 			executeCommand();
 		}
@@ -844,6 +885,9 @@ int main(int MainArgc, char *MainArgv[])
 			// exit(0);
 			break;
 		}
+
+		
+		
 		// parallelCommands();
 	}
 
