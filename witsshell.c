@@ -374,45 +374,48 @@ int redirection()
 		}
 	}
 
-	if (command[redirectPos]==NULL)
+	if (redirect && command[redirectPos]==NULL)
 	{
 		invalidRediction  = true;
 		char error_message[30] = "An error has occurred\n";
 		write(STDERR_FILENO, error_message, strlen(error_message));
 		//exit(0);
-	}else 
+	}else if (redirect && command[redirectPos+1]!=NULL)
 	{
-		if (redirect)
-		{
-
-			int status;
-
-			if (fork() == 0)
-			{
-				fileName = command[redirectPos];
-				//strtok(fileName, "\n");
-				strcat(fileName, ".txt");
-
-				memset(command, 0 , sizeof (command));
-				for (int i = 0; i < redirectPos; i++)
-				{
-					if (i!=redirectPos-1)
-					{
-						command[i] = commandTemp[i];
-						//printf("%s\n", command[i]);
-					}
-				}
-				arraySize = redirectPos;
-				//printf("%u\n", arraySize);
-			
-			}
-			else
-			{
-				wait(&status);
-				exit(0);
-			}
-		}	
+		invalidRediction  = true;
+		char error_message[30] = "An error has occurred\n";
+		write(STDERR_FILENO, error_message, strlen(error_message));
 	}
+	else if (redirect)
+	{
+		int status;
+
+		if (fork() == 0)
+		{
+			fileName = command[redirectPos];
+			//strtok(fileName, "\n");
+			//strcat(fileName, ".txt");
+
+			memset(command, 0 , sizeof (command));
+			for (int i = 0; i < redirectPos; i++)
+			{
+				if (i!=redirectPos-1)
+				{
+					command[i] = commandTemp[i];
+					//printf("%s\n", command[i]);
+				}
+			}
+			arraySize = redirectPos;
+			//printf("%u\n", arraySize);
+			
+		}
+		else
+		{
+			wait(&status);
+			exit(0);
+		}
+	}
+	
 	
 
 	

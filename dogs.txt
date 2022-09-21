@@ -1,0 +1,7 @@
+dogs.txt
+pol.9.txt
+tester
+tests
+test-witsshell.sh
+witsshell
+witsshell.c
