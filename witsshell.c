@@ -72,8 +72,15 @@ int checkExit(char *b)
 
 	if (comp == 0)
 	{
-		mustExit = true;
-		exit(0);
+		if (arraySize>1)
+		{
+			char error_message[30] = "An error has occurred\n";
+			write(STDERR_FILENO, error_message, strlen(error_message));
+		}else{
+			mustExit = true;
+			exit(0);
+		}
+		
 	}
 }
 
@@ -189,7 +196,7 @@ bool verifyCommand(){
 		result = access (possibleExcutingFile, F_OK);
 		if (result == 0)
 		{
-			//printf("can execute the command\n");
+			printf("can execute the command\n");
 			canExecute = true;
 			strcat(executable, pathArray[i]);
 			//strtok(command[0], "\n");
@@ -249,6 +256,7 @@ int executeCommand()
 				// close(pfd);
 
 				execv(executable, command);
+				//execv("/bin/sh/p1.sh", command);
 			}
 			else
 			{
@@ -264,11 +272,13 @@ int executeCommand()
 			if (fork() == 0)
 			{
 
-				execv(executable, command);
+				//execv(executable, command);
+				execv("tests/p2.sh", args);
 			}	
 			else
 			{
 				wait(&status);
+				//printf("%d\n",WEXITSTATUS(status));
 				return (0);
 			}
 		}
