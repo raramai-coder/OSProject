@@ -14,11 +14,14 @@ char *command[1024];
 char *fileName;
 int arraySize = 0;
 char *pathArray[1024] = {"/bin/"};
+int pathArraySize = 1;
 bool redirect = false;
 FILE *fp;
 int pCommands = 1;
 bool parallel = false;
 bool mustExit = false;
+char *executable[1024];
+char *args[1024];
 #pragma endregion
 
 #pragma region parallel commands variables
@@ -47,9 +50,10 @@ int processPath()
 		for (int i = 1; i < arraySize; i++)
 		{
 			pathArray[i] = command[i];
+			++pathArraySize;
 		}
 
-		// printf("%u", arraySize);
+		//printf("%u", pathArraySize);
 
 		// for (int i = 0; i < arraySize; i++)
 		// {
@@ -168,44 +172,69 @@ int builtInCommand(char *b)
 	cdCommand();   // check and run cd built in function
 }
 
+bool verifyCommand(){
+	bool canExecute = false;
+	int result;
+
+	for (int i = 0; i < pathArraySize; i++)
+	{
+		char *possibleExcutingFile = malloc(1024);
+		strcat(possibleExcutingFile,pathArray[i]);
+		strcat(possibleExcutingFile,command[0]);
+		printf("%s\n", possibleExcutingFile);
+
+		memset(executable,0,sizeof executable);
+
+		result = access (possibleExcutingFile, F_OK);
+		if (result == 0)
+		{
+			printf("can execute the command\n");
+			canExecute = true;
+			strcat(executable, pathArray[i]);
+			//strtok(command[0], "\n");
+			strcat(executable, command[0]);
+			break;
+			
+		}
+		
+		else
+		{
+			printf("can't execute the command\n");
+		}
+		
+	}
+	
+	// const char *executingFile = "/bin/looos";
+
+
+	// result = access (executingFile, F_OK);
+	// if (result == 0)
+	// {
+	// 	printf("can execute the command\n");
+	// }else
+	// {
+	// 	printf("can't execute the command\n");
+	// }
+
+	return canExecute;
+}
+
 // function to execute bin commands
 int executeCommand()
 {
 
 	int status;
-	char *args[2];
-	char *executable = malloc(100);
+	// char *args[2];
+	// char *executable = malloc(100);
+	
 
-	strcat(executable, pathArray[0]);
-	strtok(command[0], "\n");
-	strcat(executable, command[0]);
+	//strcat(executable, pathArray[0]);
+	//strtok(command[0], "\n");
+	//strcat(executable, command[0]);
 	int pfd;
 
-	if (redirect)
-	{
-		// printf("must redirecty");
-
-		mode_t mode = S_IRWXU;
-		pfd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, mode);
-		if (fork() == 0)
-		{
-			dup2(pfd, 1);
-			dup2(pfd, 2);
-			// close(pfd);
-
-			execv(executable, command);
-		}
-		else
-		{
-			wait(&status);
-			close(pfd);
-			return (0);
-		}
-		// close(pfd);
-	}
-	else
-	{
-
+	verifyCommand();
+	if(verifyCommand()){
 		if (fork() == 0)
 		{
 
@@ -217,6 +246,43 @@ int executeCommand()
 			return (0);
 		}
 	}
+
+	// if (redirect)
+	// {
+	// 	// printf("must redirecty");
+
+	// 	mode_t mode = S_IRWXU;
+	// 	pfd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, mode);
+	// 	if (fork() == 0)
+	// 	{
+	// 		dup2(pfd, 1);
+	// 		dup2(pfd, 2);
+	// 		// close(pfd);
+
+	// 		execv(executable, command);
+	// 	}
+	// 	else
+	// 	{
+	// 		wait(&status);
+	// 		close(pfd);
+	// 		return (0);
+	// 	}
+	// 	// close(pfd);
+	// }
+	// else
+	// {
+
+	// 	if (fork() == 0)
+	// 	{
+
+	// 		execv(executable, command);
+	// 	}
+	// 	else
+	// 	{
+	// 		wait(&status);
+	// 		return (0);
+	// 	}
+	// }
 }
 
 // function to handle user redirecting output in terminal
@@ -328,7 +394,7 @@ int pExit(char b[])
 		// char *out = "exit\n";
 		// checkExit(out);
 		// printf("compared to true\n");
-		// mustExit = true;
+		mustExit = true;
 		// printf(" in pExit %i\n", mustExit);
 		_exit(0);
 	}
@@ -725,10 +791,10 @@ int main(int MainArgc, char *MainArgv[])
 
 	while (characters != EOF)
 	{
-#pragma region reset variables
+		#pragma region reset variables
 		redirect = false;
 		parallel = false;
-#pragma endregion
+		#pragma endregion
 
 		printf("witsshell>");
 		characters = getline(&b, &bufsize, stdin);
@@ -737,7 +803,7 @@ int main(int MainArgc, char *MainArgv[])
 		{
 			parallelCommands(b);
 			// printf("we're here");
-			printf("%i\n", mustExit);
+			//printf("%i\n", mustExit);
 		}
 		else
 		{
