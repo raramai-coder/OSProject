@@ -13,7 +13,7 @@
 char *command[1024];
 char *fileName;
 int arraySize = 0;
-char *pathArray[1024] = {"/bin/"};
+char pathArray[1024][1024] = {"/bin/"};
 int pathArraySize = 1;
 bool redirect = false;
 FILE *fp;
@@ -43,20 +43,22 @@ int processPath()
 
 		//printf("user is setting path");
 
-		memset(pathArray, 0, sizeof pathArray);
+		memset(pathArray, 0, sizeof (pathArray));
 		pathArraySize = 1;
-		pathArray[0] = "/bin/";
+		//pathArray[0] = "/bin/";
+		strcpy(pathArray[0], "/bin/");
 		// pathArray ={"/bin/"};
 		// printf("%s\n",pathArray[0]);
 
 		for (int i = 1; i < arraySize; i++)
 		{
-			pathArray[i] = command[i];
+			//pathArray[i] = command[i];
+			strcpy(pathArray[i],command[i]);
 			++pathArraySize;
 		}
 
 		mustContinue = true;
-		//return(0);
+		return(0);
 
 		//printf("%u", pathArraySize);
 
@@ -65,6 +67,12 @@ int processPath()
 		// 	printf("%s\n",pathArray[i]);
 		// }
 	}
+
+	//printf("%s\n", pathArray[1dogs/ 
+	// for (int i = 0; i < pathArraySize; i++)
+	// {
+	// 	printf("%s\n",pathArray[i]);
+	// }
 
 }
 
@@ -95,7 +103,7 @@ int separateCommand(char *b)
 {
 	char *found;
 	arraySize = 0;
-	memset(command, 0, sizeof command);
+	memset(command, 0, sizeof (command));
 	strtok(b, "\n");
 
 	while ((found = strsep(&b, " ")) != NULL)
@@ -186,27 +194,43 @@ int cdCommand()
 int builtInCommand(char *b)
 {
 	checkExit(b);  // check and run exit built in function
+	
 	processPath(); // check and run path built in function
+	// for (int i = 0; i < pathArraySize; i++)
+	// {
+	// 	printf("%s\n",pathArray[i]);
+	// }
 	cdCommand();   // check and run cd built in function
 }
 
 bool verifyCommand(){
+	
+	// for (int i = 0; i < pathArraySize; i++)
+	// {
+	// 	printf("%s\n",pathArray[i]);
+	// }
+	
 	bool canExecute = false;
 	int result;
 
-	for (int i = 0; i < pathArraySize; i++)
-	{
-		printf("%s\n",pathArray[i]);
-	}
+	// for (int i = 0; i < pathArraySize; i++)
+	// {
+	// 	printf("%s\n",pathArray[i]);
+	// }
 
 	for (int i = 0; i < pathArraySize; i++)
 	{
+		// for (int i = 0; i < pathArraySize; i++)
+		// {
+		// 	printf("%s\n",pathArray[i]);
+		// }
+		
 		char *possibleExcutingFile = malloc(1024);
 		strcat(possibleExcutingFile,pathArray[i]);
 		strcat(possibleExcutingFile,command[0]);
-		printf("%s\n", possibleExcutingFile);
+		//printf("%s\n", possibleExcutingFile);
 
-		memset(executable,0,sizeof executable);
+		memset(executable,0,sizeof (executable));
 
 		result = access (possibleExcutingFile, F_OK);
 		if (result == 0)
@@ -233,6 +257,10 @@ bool verifyCommand(){
 	// 	mustContinue = true;
 	// }
 
+	// for (int i = 0; i < pathArraySize; i++)
+	// {
+	// 	printf("%s\n",pathArray[i]);
+	// }
 
 	return canExecute;
 }
@@ -243,6 +271,11 @@ int executeCommand()
 
 	int status;
 	int pfd;
+
+	// for (int i = 0; i < pathArraySize; i++)
+	// {
+	// 	printf("%s\n",pathArray[i]);
+	// }
 
 	//verifyCommand();
 	if(verifyCommand()){
@@ -287,6 +320,11 @@ int executeCommand()
 				// }
 
 				execv(executable, command);// for (int i = 0; i < pathArraySize; i++)
+
+				// for (int i = 0; i < pathArraySize; i++)
+				// {
+				// 	printf("%s\n",pathArray[i]);
+				// }
 			// {
 			// 	printf("%s\n",pathArray[i]);
 			}
@@ -346,7 +384,7 @@ int redirection()
 			//strtok(fileName, "\n");
 			strcat(fileName, ".txt");
 
-			memset(command, 0 , sizeof command);
+			memset(command, 0 , sizeof (command));
 			for (int i = 0; i < redirectPos; i++)
 			{
 				if (i!=redirectPos-1)
@@ -392,6 +430,11 @@ bool checkParallel()
 			++pCommands;
 		}
 	}
+
+	// for (int i = 0; i < pathArraySize; i++)
+	// {
+	// 	printf("%s\n",pathArray[i]);
+	// }
 
 	return parallel;
 }
@@ -450,11 +493,13 @@ int pProcessPath(char b[])
 	{
 
 		memset(pathArray, 0, sizeof pathArray);
-		pathArray[0] = "/bin/";
+		//pathArray[0] = "/bin/";
+		strcpy(pathArray[0], "/bin/");
 
 		for (int i = 1; i < arraySize; i++)
 		{
-			pathArray[i] = pCommand[i];
+			//pathArray[i] = pCommand[i];
+			strcpy(pathArray[i], "/bin/");
 		}
 
 		// printf("%u", arraySize);
@@ -695,6 +740,8 @@ int parallelCommands()
 	memset(commandsArray, 0, sizeof commandsArray);
 
 	for (int i = 0; i < arraySize; i++)
+			// printf("must exit");
+			// exit(0);
 	{
 		// printf("%s\n", command[i]);
 		char block[] = "&";
@@ -854,35 +901,36 @@ int main(int MainArgc, char *MainArgv[])
 		printf("witsshell>");
 		characters = getline(&b, &bufsize, stdin);
 		separateCommand(b); // separate the input string into an array
+
+		// for (int i = 0; i < pathArraySize; i++)
+		// {
+		// 	printf("%s\n",pathArray[i]);
+		// }
 		if (checkParallel())
 		{
 			//printf("we're running paralle commands");
 			parallelCommands(b);
 			// printf("we're here");
 			//printf("%i\n", mustExit);
+			
 		}
 		else
 		{
-			// for (int i = 0; i < pathArraySize; i++)
-			// {
-			// 	printf("%s\n",pathArray[i]);
-			// }
 			builtInCommand(b); // checks for built-in commands and runs those
-
+			
 			if (mustContinue)
 			{
 				continue;
 			}
 
 			redirection();
+			
 			executeCommand();
 		}
 		// mustExit = true;
 
 		if (mustExit)
 		{
-			// printf("must exit");
-			// exit(0);
 			break;
 		}
 
