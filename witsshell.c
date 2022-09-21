@@ -181,14 +181,14 @@ bool verifyCommand(){
 		char *possibleExcutingFile = malloc(1024);
 		strcat(possibleExcutingFile,pathArray[i]);
 		strcat(possibleExcutingFile,command[0]);
-		printf("%s\n", possibleExcutingFile);
+		//printf("%s\n", possibleExcutingFile);
 
 		memset(executable,0,sizeof executable);
 
 		result = access (possibleExcutingFile, F_OK);
 		if (result == 0)
 		{
-			printf("can execute the command\n");
+			//printf("can execute the command\n");
 			canExecute = true;
 			strcat(executable, pathArray[i]);
 			//strtok(command[0], "\n");
@@ -197,12 +197,18 @@ bool verifyCommand(){
 			
 		}
 		
-		else
-		{
-			printf("can't execute the command\n");
-		}
+		// else
+		// {
+		// 	printf("can't execute the command\n");
+		// }
 		
 	}
+
+	if (!canExecute)
+	{
+		printf("can't execute the command\n");
+	}
+	
 	
 	// const char *executingFile = "/bin/looos";
 
@@ -224,27 +230,59 @@ int executeCommand()
 {
 
 	int status;
-	// char *args[2];
-	// char *executable = malloc(100);
-	
-
-	//strcat(executable, pathArray[0]);
-	//strtok(command[0], "\n");
-	//strcat(executable, command[0]);
 	int pfd;
 
-	verifyCommand();
+	//verifyCommand();
 	if(verifyCommand()){
-		if (fork() == 0)
+		
+		if (redirect)
 		{
+			// printf("must redirecty");
 
-			execv(executable, command);
+			mode_t mode = S_IRWXU;
+			pfd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, mode);
+			if (fork() == 0)
+			{
+				dup2(pfd, 1);
+				dup2(pfd, 2);
+				// close(pfd);
+
+				execv(executable, command);
+			}
+			else
+			{
+				wait(&status);
+				close(pfd);
+				return (0);
+			}
+			// close(pfd);
 		}
 		else
 		{
-			wait(&status);
-			return (0);
+
+			if (fork() == 0)
+			{
+
+				execv(executable, command);
+			}	
+			else
+			{
+				wait(&status);
+				return (0);
+			}
 		}
+		
+		
+		// if (fork() == 0)
+		// {
+
+		// 	execv(executable, command);
+		// }
+		// else
+		// {
+		// 	wait(&status);
+		// 	return (0);
+		// }
 	}
 
 	// if (redirect)
@@ -291,9 +329,11 @@ int redirection()
 
 	char redirectCommand[] = ">";
 	int redirectPos = 0;
+	char *commandTemp[1024];
 
 	for (int i = 0; i < arraySize; ++i)
 	{
+		commandTemp[i] = command[i];
 		int comp = strcmp(command[i], redirectCommand);
 		if (comp == 0)
 		{
@@ -312,6 +352,19 @@ int redirection()
 			fileName = command[redirectPos];
 			strtok(fileName, "\n");
 			strcat(fileName, ".txt");
+
+			memset(command, 0 , sizeof command);
+			for (int i = 0; i < redirectPos; i++)
+			{
+				if (i!=redirectPos-1)
+				{
+					command[i] = commandTemp[i];
+					printf("%s\n", command[i]);
+				}
+			}
+			arraySize = redirectPos;
+			//printf("%u\n", arraySize);
+			
 		}
 		else
 		{
@@ -319,6 +372,11 @@ int redirection()
 			exit(0);
 		}
 	}
+
+	// for (int i = 0; i < redirectPos; i++)
+	// {
+	// 	printf("%s\n",command[i]);
+	// }
 }
 
 bool checkParallel()
