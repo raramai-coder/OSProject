@@ -41,12 +41,13 @@ int processPath()
 	if (comp == 0)
 	{
 
+		
 		//printf("user is setting path");
 
 		memset(pathArray, 0, sizeof (pathArray));
 		pathArraySize = 1;
 		//pathArray[0] = "/bin/";
-		strcpy(pathArray[0], "/bin/");
+		//strcpy(pathArray[0], "/bin/");
 		// pathArray ={"/bin/"};
 		// printf("%s\n",pathArray[0]);
 
@@ -336,7 +337,13 @@ int executeCommand()
 			}
 		}
 		
+	}else
+	{
+		// perror("UNABLE to change directory");
+		char error_message[30] = "An error has occurred\n";
+		write(STDERR_FILENO, error_message, strlen(error_message));
 	}
+	
 
 
 }
@@ -358,6 +365,12 @@ int redirection()
 			redirect = true;
 			redirectPos = i + 1;
 		}
+
+		if (command[redirectPos]==NULL)
+		{
+			printf("no output file given");
+		}
+		
 	}
 
 	if (redirect)
