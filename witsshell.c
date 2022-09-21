@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <ctype.h>
 
 #pragma region global variables
 char *command[1024];
@@ -100,6 +101,33 @@ int checkExit(char *b)
 	}
 }
 
+char *trimWhiteSpaces(char *str)
+{
+  char *end;
+
+  // Trim leading space
+  while(isspace((unsigned char)*str)){
+	str++;
+  } 
+
+  if(*str == 0) {
+	 // All spaces?
+    return str;
+  }
+
+  // Trim trailing space
+  end = str + strlen(str) - 1;
+  while(end > str && isspace((unsigned char)*end)){
+	end--;
+  } 
+
+  // Write new null terminator character
+  end[1] = '\0';
+
+  return str;
+}
+
+
 // function to separate input string into parts and store in array
 int separateCommand(char *b)
 {
@@ -108,7 +136,10 @@ int separateCommand(char *b)
 	memset(command, 0, sizeof (command));
 	strtok(b, "\n");
 
-	while ((found = strsep(&b, " ")) != NULL)
+	char *trimmedB = trimWhiteSpaces(b);
+	//printf("%s\n",trimmedB);
+
+	while ((found = strsep(&trimmedB, " ")) != NULL)
 	{
 		// printf("%s\n",found);
 		//strtok(found, "\n");
@@ -385,7 +416,13 @@ int redirection()
 		invalidRediction  = true;
 		char error_message[30] = "An error has occurred\n";
 		write(STDERR_FILENO, error_message, strlen(error_message));
+	}else if (redirect && redirectPos == 0)
+	{
+		invalidRediction  = true;
+		char error_message[30] = "An error has occurred\n";
+		write(STDERR_FILENO, error_message, strlen(error_message));
 	}
+	
 	else if (redirect)
 	{
 		int status;
