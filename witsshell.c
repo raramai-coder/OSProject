@@ -668,7 +668,24 @@ int pRedirection()
 
 	// printf("%u\n",redirectPos);
 
-	if (redirect)
+	if (redirect && pCommand[redirectPos]==NULL)
+	{
+		invalidRediction  = true;
+		char error_message[30] = "An error has occurred\n";
+		write(STDERR_FILENO, error_message, strlen(error_message));
+		//exit(0);
+	}else if (redirect && pCommand[redirectPos+1]!=NULL)
+	{
+		invalidRediction  = true;
+		char error_message[30] = "An error has occurred\n";
+		write(STDERR_FILENO, error_message, strlen(error_message));
+	}else if (redirect && redirectPos == 0)
+	{
+		invalidRediction  = true;
+		char error_message[30] = "An error has occurred\n";
+		write(STDERR_FILENO, error_message, strlen(error_message));
+	}
+	else if (redirect)
 	{
 
 		// printf("must redirect baby");
@@ -827,6 +844,11 @@ int parallelCommands()
 			int stringlength = strlen(newCommand);
 			//printf("%u\n",stringlength);
 			newCommand[stringlength-1] = '\0';
+			// if (newCommand ==NULL)
+			// {
+			// 	printf("wtf bruh?");
+			// }
+			
 			strcpy(commandsArray[commandNumber], newCommand);
 			// printf("%s\n", newCommand);
 			memset(newCommand, 0, sizeof newCommand);
@@ -844,11 +866,16 @@ int parallelCommands()
 
 		if (i == arraySize - 1)
 		{
+			// if (newCommand ==" ")
+			// {
+			// 	printf("wtf bruh?");
+			// }
 			// printf("last command %s\n", newCommand);
 			// printf("command number %u\n", commandNumber);
 			int stringlength = strlen(newCommand);
 			//printf("%u\n",stringlength);
 			newCommand[stringlength-1] = '\0';
+			
 			++commandNumber;
 			// printf("command number %u\n", commandNumber);
 			strcpy(commandsArray[commandNumber], newCommand);
@@ -907,57 +934,118 @@ int main(int MainArgc, char *MainArgv[])
 	char *b = buffer;
 	size_t bufsize = 1024;
 	size_t characters;
+	char lineBuff[1024];
+	char *linesBatch = lineBuff;
 #pragma endregion
 
-	while (characters != EOF)
+	if(MainArgc>2){
+		char error_message[30] = "An error has occurred\n";
+		write(STDERR_FILENO, error_message, strlen(error_message));
+		exit(1);
+	}else if (MainArgc ==2)
 	{
-		#pragma region reset variables
-		redirect = false;
-		parallel = false;
-		mustContinue = false;
-		invalidRediction = false;
-		#pragma endregion
-
-		printf("witsshell>");
-		characters = getline(&b, &bufsize, stdin);
-		separateCommand(b); // separate the input string into an array
-
-		// for (int i = 0; i < pathArraySize; i++)
-		// {
-		// 	printf("%s\n",pathArray[i]);
-		// }
-		if (checkParallel())
+		FILE *filePointer;
+		char *fileName = MainArgv[1];
+		filePointer = fopen( fileName,"r");
+		if (filePointer)
 		{
-			//printf("we're running paralle commands");
-			parallelCommands(b);
-			// printf("we're here");
-			//printf("%i\n", mustExit);
-			
-		}
-		else
-		{
-			builtInCommand(b); // checks for built-in commands and runs those
-			
-			if (mustContinue)
+			while (!feof(filePointer))
 			{
-				continue;
+				#pragma region reset variables
+				redirect = false;
+				parallel = false;
+				mustContinue = false;
+				invalidRediction = false;
+				#pragma endregion
+				
+				fgets(linesBatch,sizeof(linesBatch),filePointer);
+				separateCommand(linesBatch); 
+				//puts(linesBatch);
+				if (checkParallel())
+				{
+					//printf("we're running paralle commands");
+					parallelCommands(linesBatch);
+					// printf("we're here");
+					//printf("%i\n", mustExit);
+			
+				}
+				else
+				{
+					builtInCommand(linesBatch); // checks for built-in commands and runs those
+			
+					if (mustContinue)
+					{
+						continue;
+					}
+
+					redirection();
+			
+					executeCommand();
+				}
+				// mustExit = true;
+
+				if (mustExit)
+				{
+					break;
+				}
+			}	
+		}else
+		{
+			char error_message[30] = "An error has occurred\n";
+			write(STDERR_FILENO, error_message, strlen(error_message));
+			exit(1);
+		}
+		
+		
+		
+	}else{
+		while (characters != EOF)
+		{
+			#pragma region reset variables
+			redirect = false;
+			parallel = false;
+			mustContinue = false;
+			invalidRediction = false;
+			#pragma endregion
+
+			printf("witsshell>");
+			characters = getline(&b, &bufsize, stdin);
+			separateCommand(b); // separate the input string into an array
+
+			if (checkParallel())
+			{
+				//printf("we're running paralle commands");
+				parallelCommands(b);
+				// printf("we're here");
+				//printf("%i\n", mustExit);
+			
+			}
+			else
+			{
+				builtInCommand(b); // checks for built-in commands and runs those
+			
+				if (mustContinue)
+				{
+					continue;
+				}
+
+				redirection();
+			
+				executeCommand();
+			}
+			// mustExit = true;
+
+			if (mustExit)
+			{
+				break;
 			}
 
-			redirection();
-			
-			executeCommand();
-		}
-		// mustExit = true;
-
-		if (mustExit)
-		{
-			break;
-		}
-
 		
 		
-		// parallelCommands();
+			// parallelCommands();
+		}
 	}
+	
 
 	exit(0);
 }
