@@ -23,6 +23,7 @@ bool mustExit = false;
 bool mustContinue = false;
 char executable[1024];
 char *args[1024];
+bool invalidRediction = false;
 #pragma endregion
 
 #pragma region parallel commands variables
@@ -278,71 +279,77 @@ int executeCommand()
 	// 	printf("%s\n",pathArray[i]);
 	// }
 
-	//verifyCommand();
-	if(verifyCommand()){
+	if(invalidRediction){
+		return 0;
+	}else{
+		//verifyCommand();
+		if(verifyCommand()){
 		
-		if (redirect)
-		{
-			// printf("must redirecty");
-
-			mode_t mode = S_IRWXU;
-			pfd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, mode);
-			if (fork() == 0)
+			if (redirect)
 			{
-				dup2(pfd, 1);
-				dup2(pfd, 2);
+				// printf("must redirecty");
+
+				mode_t mode = S_IRWXU;
+				pfd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, mode);
+				if (fork() == 0)
+				{
+					dup2(pfd, 1);
+					dup2(pfd, 2);
+					// close(pfd);
+					//printf("%s\n", executable);
+					execv(executable, command);
+					//execv("/bin/sh/p1.sh", command);
+				}
+				else
+				{
+					wait(&status);
+					close(pfd);
+					return (0);
+				}
 				// close(pfd);
-				//printf("%s\n", executable);
-				execv(executable, command);
-				//execv("/bin/sh/p1.sh", command);
-			}
+				}
 			else
 			{
-				wait(&status);
-				close(pfd);
-				return (0);
-			}
-			// close(pfd);
-		}
-		else
-		{
-			// for (int i = 0; i < pathArraySize; i++)
-			// {
-			// 	printf("%s\n",pathArray[i]);
-			// }
+				// for (int i = 0; i < pathArraySize; i++)
+				// {
+				// 	printf("%s\n",pathArray[i]);
+				// }
 			
-			if (fork() == 0)
-			{
+				if (fork() == 0)
+				{
 
 				
-				// for (int i = 0; i < pathArraySize; i++)
+					// for (int i = 0; i < pathArraySize; i++)
+					// {
+					// 	printf("%s\n",pathArray[i]);
+					// }
+
+					execv(executable, command);// for (int i = 0; i < pathArraySize; i++)
+
+					// for (int i = 0; i < pathArraySize; i++)
+					// {
+					// 	printf("%s\n",pathArray[i]);
+					// }
 				// {
 				// 	printf("%s\n",pathArray[i]);
-				// }
-
-				execv(executable, command);// for (int i = 0; i < pathArraySize; i++)
-
-				// for (int i = 0; i < pathArraySize; i++)
-				// {
-				// 	printf("%s\n",pathArray[i]);
-				// }
-			// {
-			// 	printf("%s\n",pathArray[i]);
+				}
+				else
+				{
+					wait(&status);
+					//printf("%d\n",WEXITSTATUS(status));
+					return (0);
+				}
 			}
-			else
-			{
-				wait(&status);
-				//printf("%d\n",WEXITSTATUS(status));
-				return (0);
-			}
-		}
 		
-	}else
-	{
-		// perror("UNABLE to change directory");
-		char error_message[30] = "An error has occurred\n";
-		write(STDERR_FILENO, error_message, strlen(error_message));
+		}else
+		{
+			// perror("UNABLE to change directory");
+			char error_message[30] = "An error has occurred\n";
+			write(STDERR_FILENO, error_message, strlen(error_message));
+		}
 	}
+
+	
 	
 
 
@@ -365,44 +372,50 @@ int redirection()
 			redirect = true;
 			redirectPos = i + 1;
 		}
-
-		if (command[redirectPos]==NULL)
-		{
-			printf("no output file given");
-		}
-		
 	}
 
-	if (redirect)
+	if (command[redirectPos]==NULL)
 	{
-
-		int status;
-
-		if (fork() == 0)
+		invalidRediction  = true;
+		char error_message[30] = "An error has occurred\n";
+		write(STDERR_FILENO, error_message, strlen(error_message));
+		//exit(0);
+	}else 
+	{
+		if (redirect)
 		{
-			fileName = command[redirectPos];
-			//strtok(fileName, "\n");
-			strcat(fileName, ".txt");
 
-			memset(command, 0 , sizeof (command));
-			for (int i = 0; i < redirectPos; i++)
+			int status;
+
+			if (fork() == 0)
 			{
-				if (i!=redirectPos-1)
+				fileName = command[redirectPos];
+				//strtok(fileName, "\n");
+				strcat(fileName, ".txt");
+
+				memset(command, 0 , sizeof (command));
+				for (int i = 0; i < redirectPos; i++)
 				{
-					command[i] = commandTemp[i];
-					//printf("%s\n", command[i]);
+					if (i!=redirectPos-1)
+					{
+						command[i] = commandTemp[i];
+						//printf("%s\n", command[i]);
+					}
 				}
-			}
-			arraySize = redirectPos;
-			//printf("%u\n", arraySize);
+				arraySize = redirectPos;
+				//printf("%u\n", arraySize);
 			
-		}
-		else
-		{
-			wait(&status);
-			exit(0);
-		}
+			}
+			else
+			{
+				wait(&status);
+				exit(0);
+			}
+		}	
 	}
+	
+
+	
 
 	// for (int i = 0; i < redirectPos; i++)
 	// {
@@ -862,6 +875,7 @@ int main(int MainArgc, char *MainArgv[])
 		redirect = false;
 		parallel = false;
 		mustContinue = false;
+		invalidRediction = false;
 		#pragma endregion
 
 		printf("witsshell>");

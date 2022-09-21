@@ -1,5 +1,0 @@
-tester
-tests
-test-witsshell.sh
-witsshell
-witsshell.c
