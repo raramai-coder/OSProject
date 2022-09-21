@@ -338,19 +338,6 @@ int executeCommand()
 		
 	}
 
-	// if (fork() == 0)
-	// 		{
-
-	// 			//execv(executable, command);
-	// 			printf("here");
-	// 			execv("tests/p2.sh", args);
-	// 		}	
-	// 		else
-	// 		{
-	// 			wait(&status);
-	// 			printf("%d\n",WEXITSTATUS(status));
-	// 			return (0);
-	// 		}
 
 }
 
@@ -443,7 +430,7 @@ int separateParallelCommand(char b[])
 {
 	char *found;
 	pArraySize = 0;
-	// memset(pCommand, 0, sizeof pCommand);
+	memset(pCommand, 0, sizeof (pCommand));
 	// printf("separating parallel command \n");
 	strtok(b,"\n");
 	
@@ -478,8 +465,17 @@ int pExit(char b[])
 
 	if (comp == 0)
 	{
-		mustExit = true;
-		_exit(0);
+		// if (arraySize>1)
+		// {
+		// 	char error_message[30] = "An error has occurred\n";
+		// 	write(STDERR_FILENO, error_message, strlen(error_message));
+		// }else{
+		// 	mustExit = true;
+		// 	_exit(0);
+		// }
+
+			mustExit = true;
+			_exit(0);
 	}
 }
 
@@ -492,15 +488,19 @@ int pProcessPath(char b[])
 	if (comp == 0)
 	{
 
-		memset(pathArray, 0, sizeof pathArray);
+		memset(pathArray, 0, sizeof (pathArray));
 		//pathArray[0] = "/bin/";
 		strcpy(pathArray[0], "/bin/");
 
 		for (int i = 1; i < arraySize; i++)
 		{
 			//pathArray[i] = pCommand[i];
-			strcpy(pathArray[i], "/bin/");
+			strcpy(pathArray[i], pCommand[i]);
+			++pathArraySize;
 		}
+
+		mustContinue = true;
+		return(0);
 
 		// printf("%u", arraySize);
 
@@ -672,6 +672,12 @@ int pExecuteCommand()
 	// char *args[2];
 	char *executable = malloc(100);
 
+	for (int i = 0; i < pArraySize; i++)
+	{
+		printf("%s\n", pCommand[i]);
+	}
+	
+
 	strcat(executable, pathArray[0]);
 	strtok(pCommand[0], "\n");
 	strcat(executable, pCommand[0]);
@@ -737,11 +743,10 @@ int parallelCommands()
 	int commandNumber = 0;
 	char *newCommand = malloc(100);
 
-	memset(commandsArray, 0, sizeof commandsArray);
+	memset(commandsArray, 0, sizeof (commandsArray));
+	memset(pCommand, 0, sizeof (pCommand));
 
 	for (int i = 0; i < arraySize; i++)
-			// printf("must exit");
-			// exit(0);
 	{
 		// printf("%s\n", command[i]);
 		char block[] = "&";
@@ -750,6 +755,9 @@ int parallelCommands()
 		if (comp == 0)
 		{ // if this is the & element
 			// commandsArray[commandNumber][commandNumber] = newCommand;
+			int stringlength = strlen(newCommand);
+			//printf("%u\n",stringlength);
+			newCommand[stringlength-1] = '\0';
 			strcpy(commandsArray[commandNumber], newCommand);
 			// printf("%s\n", newCommand);
 			memset(newCommand, 0, sizeof newCommand);
@@ -759,6 +767,7 @@ int parallelCommands()
 		}
 		else
 		{
+
 			// strcat(newCommand," ");
 			strcat(newCommand, command[i]);
 			strcat(newCommand, " ");
@@ -768,6 +777,9 @@ int parallelCommands()
 		{
 			// printf("last command %s\n", newCommand);
 			// printf("command number %u\n", commandNumber);
+			int stringlength = strlen(newCommand);
+			//printf("%u\n",stringlength);
+			newCommand[stringlength-1] = '\0';
 			++commandNumber;
 			// printf("command number %u\n", commandNumber);
 			strcpy(commandsArray[commandNumber], newCommand);
@@ -799,18 +811,6 @@ int parallelCommands()
 					//printf("child process number : %u\n", i);
 					//printf("%s\n", commandsArray[i]);
 					runParallelCommands(commandsArray[i]);
-					// printf("%s\n",commandsArray[i]);
-					//  for (int i = 0; i < commandNumber+1; i++)
-					//  {
-					//  	printf("%s\n",commandsArray[i]);
-					//  }
-					// printf(" in pForkedChild %i\n", mustExit);
-					// pBuiltInCommand(commandsArray[i+1]);
-					// printf("%s\n",commandsArray[i+1]);
-					// separateParallelCommand(commandsArray[i+1]);
-					//  builtInCommand(b);  //checks for built-in commands and runs those
-					//  redirection();
-					//  executeCommand();
 					exit(0);
 				}
 				// printf(" after each childe %i\n", mustExit);
@@ -827,56 +827,6 @@ int parallelCommands()
 		}
 		// printf(" in pMother %i\n", mustExit);
 		return (0);
-
-		// pid_t pid = fork();
-		// //pBuiltInCommand(commandsArray[0]); //compares to false
-		// if(pid == 0){
-		// 	printf("child process number : 1 \n");
-		// 	runParallelCommands(commandsArray[0]);
-		// 	//pBuiltInCommand(commandsArray[0]); // compars to true when run in the child process
-		// 	//pBuiltInCommand(commandsArray[0]);
-		// 	//printf("%s\n",commandsArray[0]);
-		// 	//separateParallelCommand(commandsArray[0]);
-		// 	// builtInCommand(b);  //checks for built-in commands and runs those
-		// 	// redirection();
-		// 	// executeCommand();
-		// 	exit(0);
-		// 	//return(0);
-		// }else{
-		// 	// for (int i = 0; i < commandNumber; i++)
-		// 	// {
-		// 	// 	pid = fork();
-		// 	// 	if(pid==0){
-		// 	// 		printf("child process number : %u\n", i+2);
-		// 	// 		runParallelCommands(commandsArray[i+1]);
-		// 	// 		//printf(" in pForkedChild %i\n", mustExit);
-		// 	// 		//pBuiltInCommand(commandsArray[i+1]);
-		// 	// 		//printf("%s\n",commandsArray[i+1]);
-		// 	// 		//separateParallelCommand(commandsArray[i+1]);
-		// 	// 		// builtInCommand(b);  //checks for built-in commands and runs those
-		// 	// 		// redirection();
-		// 	// 		// executeCommand();
-		// 	// 		exit(0);
-		// 	// 	}
-		// 	// 	//printf(" after each childe %i\n", mustExit);
-
-		// 	// 	pBuiltInCommand(commandsArray[i+1]);
-
-		// 	// }
-		// 	//wait(&status);
-		// 	//exit(0);
-		// 	//return(0);
-
-		// 	//pBuiltInCommand(commandsArray[0]); //compares to false
-
-		// 	//printf("Waiting all child.\n");
-		// 	while ((pid=waitpid(-1,&status,0))!=-1) {
-		// 	printf("Process %d terminated\n",pid);
-		// 	}
-		// 	//printf(" in pMother %i\n", mustExit);
-		// 	return(0);
-
-		// }
 	}
 }
 
