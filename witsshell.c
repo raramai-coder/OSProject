@@ -83,11 +83,12 @@ int separateCommand(char *b)
 	char *found;
 	arraySize = 0;
 	memset(command, 0, sizeof command);
+	strtok(b, "\n");
 
 	while ((found = strsep(&b, " ")) != NULL)
 	{
 		// printf("%s\n",found);
-		strtok(found, "\n");
+		//strtok(found, "\n");
 		command[arraySize] = found;
 		arraySize++;
 	}
@@ -204,10 +205,10 @@ bool verifyCommand(){
 		
 	}
 
-	if (!canExecute)
-	{
-		printf("can't execute the command\n");
-	}
+	// if (!canExecute)
+	// {
+	// 	printf("can't execute the command\n");
+	// }
 	
 	
 	// const char *executingFile = "/bin/looos";
@@ -272,55 +273,8 @@ int executeCommand()
 			}
 		}
 		
-		
-		// if (fork() == 0)
-		// {
-
-		// 	execv(executable, command);
-		// }
-		// else
-		// {
-		// 	wait(&status);
-		// 	return (0);
-		// }
 	}
 
-	// if (redirect)
-	// {
-	// 	// printf("must redirecty");
-
-	// 	mode_t mode = S_IRWXU;
-	// 	pfd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, mode);
-	// 	if (fork() == 0)
-	// 	{
-	// 		dup2(pfd, 1);
-	// 		dup2(pfd, 2);
-	// 		// close(pfd);
-
-	// 		execv(executable, command);
-	// 	}
-	// 	else
-	// 	{
-	// 		wait(&status);
-	// 		close(pfd);
-	// 		return (0);
-	// 	}
-	// 	// close(pfd);
-	// }
-	// else
-	// {
-
-	// 	if (fork() == 0)
-	// 	{
-
-	// 		execv(executable, command);
-	// 	}
-	// 	else
-	// 	{
-	// 		wait(&status);
-	// 		return (0);
-	// 	}
-	// }
 }
 
 // function to handle user redirecting output in terminal
@@ -350,7 +304,7 @@ int redirection()
 		if (fork() == 0)
 		{
 			fileName = command[redirectPos];
-			strtok(fileName, "\n");
+			//strtok(fileName, "\n");
 			strcat(fileName, ".txt");
 
 			memset(command, 0 , sizeof command);
@@ -359,7 +313,7 @@ int redirection()
 				if (i!=redirectPos-1)
 				{
 					command[i] = commandTemp[i];
-					printf("%s\n", command[i]);
+					//printf("%s\n", command[i]);
 				}
 			}
 			arraySize = redirectPos;
@@ -409,11 +363,12 @@ int separateParallelCommand(char b[])
 	pArraySize = 0;
 	// memset(pCommand, 0, sizeof pCommand);
 	// printf("separating parallel command \n");
-
-	while ((found = strsep(&b, " ")) != NULL)
+	strtok(b,"\n");
+	
+	while ((found = strsep(&b," ")) != NULL)
 	{
 		// printf("%s\n",found);
-		strtok(found, "\n");
+		//strtok(found, "\n");
 		pCommand[pArraySize] = found;
 		pArraySize++;
 	}
@@ -435,64 +390,28 @@ int separateParallelCommand(char b[])
 
 int pExit(char b[])
 {
-
-	// exit(0);
-	// mustExit = true;
-	strtok(b, "\n");
 	char exitCommand[] = "exit";
 
 	int comp = strcmp(b, exitCommand);
-	// printf("%s\n",b);
 
 	if (comp == 0)
 	{
-		// printf("%s\n",b);
-		// printf("%i\n", comp);
-		// checkExit("exit\n");
-		// char *out = "exit\n";
-		// checkExit(out);
-		// printf("compared to true\n");
 		mustExit = true;
-		// printf(" in pExit %i\n", mustExit);
 		_exit(0);
 	}
-
-	// else{
-	// 	//printf("%s\n",b);
-	// 	//printf("compared to false");
-	// 	//printf("%s\n",exitCommand);
-	// 	printf("%i\n", comp);
-	// }
-
-	// char exitCommandMidline[] = "exit";
-
-	// int compMidline = strcmp(b,exitCommandMidline);
-	// //printf("%s\n",b);
-
-	// if(compMidline==0){
-	// 	mustExit = true;
-	// 	exit(0);
-	// }else{
-	// 	//printf("%i\n", compMidline);
-	// }
 }
 
 int pProcessPath(char b[])
 {
 	char pathCommand[] = "path";
-	strtok(b, "\n");
+	//strtok(b, "\n");
 	int comp = strcmp(b, pathCommand);
 
 	if (comp == 0)
 	{
 
-		// printf("user is setting path\n");
-		//  printf("%s\n", b);
-
 		memset(pathArray, 0, sizeof pathArray);
 		pathArray[0] = "/bin/";
-		// //pathArray ={"/bin/"};
-		// printf("%s\n",pathArray[0]);
 
 		for (int i = 1; i < arraySize; i++)
 		{
@@ -501,17 +420,17 @@ int pProcessPath(char b[])
 
 		// printf("%u", arraySize);
 
-		for (int i = 0; i < arraySize; i++)
-		{
-			printf("%s\n", pathArray[i]);
-		}
+		// for (int i = 0; i < arraySize; i++)
+		// {
+		// 	printf("%s\n", pathArray[i]);
+		// }
 	}
 }
 
-int pBuiltInCommand(char b[])
-{
-	pExit(b);
-}
+// int pBuiltInCommand(char b[])
+// {
+// 	pExit(b);
+// }
 
 int pCdCommand()
 {
@@ -584,9 +503,11 @@ int pRedirection()
 
 	char redirectCommand[] = ">";
 	int redirectPos = 0;
+	char *commandTemp[1024];
 
 	for (int i = 0; i < pArraySize; ++i)
 	{
+		commandTemp[i] = pCommand[i];
 		int comp = strcmp(pCommand[i], redirectCommand);
 		if (comp == 0)
 		{
@@ -607,14 +528,57 @@ int pRedirection()
 		{
 			fileName = pCommand[redirectPos];
 			// printf("%s\n", fileName);
-			strtok(fileName, "\n");
+			//strtok(fileName, "\n");
 			strcat(fileName, ".txt");
+			memset(pCommand, 0 , sizeof pCommand);
+			for (int i = 0; i < redirectPos; i++)
+			{
+				if (i!=redirectPos-1)
+				{
+					pCommand[i] = commandTemp[i];
+					//printf("%s\n", pCommand[i]);
+				}
+			}
+			arraySize = redirectPos;
 		}
 		else
 		{
 			wait(&status);
 			exit(0);
 		}
+	}
+}
+
+bool pVerifyCommand(){
+	bool canExecute = false;
+	int result;
+
+	for (int i = 0; i < pathArraySize; i++)
+	{
+		char *possibleExcutingFile = malloc(1024);
+		strcat(possibleExcutingFile,pathArray[i]);
+		strcat(possibleExcutingFile,pCommand[0]);
+		//printf("%s\n", possibleExcutingFile);
+
+		memset(executable,0,sizeof executable);
+
+		result = access (possibleExcutingFile, F_OK);
+		if (result == 0)
+		{
+			//printf("can execute the command\n");
+			canExecute = true;
+			strcat(executable, pathArray[i]);
+			//strtok(command[0], "\n");
+			strcat(executable, pCommand[0]);
+			break;
+			
+		}
+		
+		// else
+		// {
+		// 	printf("can't execute the command\n");
+		// }
+		
 	}
 }
 
@@ -629,64 +593,56 @@ int pExecuteCommand()
 	strcat(executable, pCommand[0]);
 	int pfd;
 
-	// printf("%s\n", executable);
-
-	if (redirect)
+	//pVerifyCommand();
+	if (pVerifyCommand())
 	{
-		// printf("must redirecty");
-		mode_t mode = S_IRWXU;
-		// printf("%s\n", fileName);
-		pfd = open(fileName, O_WRONLY | O_CREAT | O_APPEND, mode);
-
-		if (fork() == 0)
+		if (redirect)
 		{
-			dup2(pfd, 1);
-			dup2(pfd, 2);
-			// close(pfd);
-			execv(executable, pCommand);
+			// printf("must redirecty");
+			mode_t mode = S_IRWXU;
+			// printf("%s\n", fileName);
+			pfd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, mode);
+
+			if (fork() == 0)
+			{
+				dup2(pfd, 1);
+				dup2(pfd, 2);
+				// close(pfd);
+				execv(executable, pCommand);
+				close(pfd);
+			}
+			else
+			{
+				wait(&status);
+				close(pfd);
+				return (0);
+			}
 			close(pfd);
 		}
 		else
 		{
-			wait(&status);
-			close(pfd);
-			return (0);
+			// printf("must not redirecty");
+			if (fork() == 0)
+			{
+				execv(executable, pCommand);
+			}
+			else
+			{
+				wait(&status);
+				return (0);
+			}
 		}
-		close(pfd);
+
 	}
-	else
-	{
-		// printf("must not redirecty");
-		if (fork() == 0)
-		{
-			execv(executable, pCommand);
-		}
-		else
-		{
-			wait(&status);
-			return (0);
-		}
-	}
+	
 }
 
 int runParallelCommands(char b[])
 {
 	separateParallelCommand(b);
 	pRedirection();
-	// for (int i = 0; i < pArraySize; i++)
-	// {
-	// 	if(i ==pArraySize-1){
-	// 		printf("%s\n",pCommand[i]);
-	// 	}else{
-	// 		printf("%s\t",pCommand[i]);
-	// 	}
-	// }
 	pProcessPath(b);
 	pCdCommand();
-	// pBuiltInCommand(b);
-	// printf(" in pPC %i\n", mustExit);
-	//  builtInCommand(b);  //checks for built-in commands and runs those
-	//  redirection();
 	pExecuteCommand();
 }
 
@@ -754,8 +710,8 @@ int parallelCommands()
 
 				if (pid == 0)
 				{
-					printf("child process number : %u\n", i);
-					printf("%s\n", commandsArray[i]);
+					//printf("child process number : %u\n", i);
+					//printf("%s\n", commandsArray[i]);
 					runParallelCommands(commandsArray[i]);
 					// printf("%s\n",commandsArray[i]);
 					//  for (int i = 0; i < commandNumber+1; i++)
@@ -774,13 +730,14 @@ int parallelCommands()
 				// printf(" after each childe %i\n", mustExit);
 
 				separateParallelCommand(commandsArray[i]);
-				pBuiltInCommand(commandsArray[i]);
+				//pBuiltInCommand(commandsArray[i]);
+				pExit(commandsArray[i]);
 			}
 		}
 
 		while ((pid = waitpid(-1, &status, 0)) != -1)
 		{
-			printf("Process %d terminated\n", pid);
+			//printf("Process %d terminated\n", pid);
 		}
 		// printf(" in pMother %i\n", mustExit);
 		return (0);
