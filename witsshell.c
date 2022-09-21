@@ -63,7 +63,7 @@ int processPath()
 		//printf("%u", pathArraySize);
 
 		// for (int i = 0; i < arraySize; i++)
-		// {
+		//ls & echo books {
 		// 	printf("%s\n",pathArray[i]);
 		// }
 	}
@@ -654,6 +654,7 @@ bool pVerifyCommand(){
 			strcat(executable, pathArray[i]);
 			//strtok(command[0], "\n");
 			strcat(executable, pCommand[0]);
+			//printf("%s\n",executable);
 			break;
 			
 		}
@@ -670,17 +671,17 @@ int pExecuteCommand()
 {
 	int status;
 	// char *args[2];
-	char *executable = malloc(100);
+	//char *executable = malloc(100);
 
-	for (int i = 0; i < pArraySize; i++)
-	{
-		printf("%s\n", pCommand[i]);
-	}
+	// for (int i = 0; i < pArraySize; i++)
+	// {
+	// 	printf("%s\n", pCommand[i]);
+	// }
 	
 
-	strcat(executable, pathArray[0]);
-	strtok(pCommand[0], "\n");
-	strcat(executable, pCommand[0]);
+	// strcat(executable, pathArray[0]);
+	// strtok(pCommand[0], "\n");
+	// strcat(executable, pCommand[0]);
 	int pfd;
 
 	//pVerifyCommand();
@@ -712,6 +713,8 @@ int pExecuteCommand()
 		else
 		{
 			// printf("must not redirecty");
+			//printf("%s\n",executable);
+
 			if (fork() == 0)
 			{
 				execv(executable, pCommand);
