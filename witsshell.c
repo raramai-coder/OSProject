@@ -934,7 +934,7 @@ int main(int MainArgc, char *MainArgv[])
 	char *b = buffer;
 	size_t bufsize = 1024;
 	size_t characters;
-	char lineBuff[1024];
+	char lineBuff[2024];
 	char *linesBatch = lineBuff;
 #pragma endregion
 
